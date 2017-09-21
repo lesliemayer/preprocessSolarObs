@@ -1,0 +1,70 @@
+# Makefile
+
+#G95 creates a file name.mod for each module name. This confuses
+#the gnu make, which thinks that .mod files are Modula2 source code
+#files. You must override this built-in rule by adding the following
+#line somewhere in your Makefile :
+
+#%.o : %.mod
+
+PROGRAM= convert_syn_gong
+OBJECTS= $(PROGRAM).o  fits_files.o \
+	read_gong_pre_header.o gong_parameters.o get_wsavers.o get_2dim_data.o \
+        carr_jd.o lead_zero.o space_cal_routines.o write_gong_syn_header.o
+
+
+CFITSDIR = ${CFITSIO_DIR}
+LDFLAGS=
+LPATH=  -L $(CFITSDIR) -lcfitsio
+
+LINK = ${FORTRAN_LINKER}
+COMPILE = ${FORTRAN_COMPILER}
+
+FORTRANDIR = ../../FORTRAN_LIB/
+SPACEDIR = $(FORTRANDIR)
+VELDIR = ../../VELOCITY/
+
+# Use this if there is problems using the cfitsio routines
+# (ex. get funny values for naxis)
+#COMPILE = g95 -c -i4
+
+$(PROGRAM): $(OBJECTS)
+	$(LINK) -o $@ $(LDFLAGS) $(OBJECTS) $(LPATH)
+
+convert_syn_gong.o: convert_syn_gong.f90 read_gong_pre_header.o fits_files.o gong_parameters.o write_gong_syn_header.o
+	$(COMPILE)  convert_syn_gong.f90 
+
+gong_parameters.o : gong_parameters.f90
+	$(COMPILE) gong_parameters.f90
+
+read_gong_pre_header.o :  read_gong_pre_header.f90 gong_parameters.o lead_zero.o space_cal_routines.o
+	$(COMPILE) read_gong_pre_header.f90
+
+get_2dim_data.o :  $(FORTRANDIR)/get_2dim_data.f90
+	$(COMPILE) $(FORTRANDIR)/get_2dim_data.f90 
+
+lead_zero.o : $(FORTRANDIR)/lead_zero.f90
+	$(COMPILE) $(FORTRANDIR)/lead_zero.f90
+
+get_wsavers.o : $(FORTRANDIR)/get_wsavers.f90
+	$(COMPILE) $(FORTRANDIR)/get_wsavers.f90
+
+fits_files.o : $(VELDIR)/fits_files.f90
+	$(COMPILE) $(VELDIR)/fits_files.f90
+
+space_cal_routines.o : $(FORTRANDIR)/space_cal_routines.f90
+	$(COMPILE) $(FORTRANDIR)/space_cal_routines.f90
+
+carr_jd.o : ../../CORONA/carr_jd.f90
+	$(COMPILE) ../../CORONA/carr_jd.f90
+
+write_gong_syn_header.o : write_gong_syn_header.f90 gong_parameters.o get_wsavers.o
+	$(COMPILE) write_gong_syn_header.f90
+
+
+
+# remove object files
+clean:
+	rm -f $(OBJECTS) $(PROGRAM) *.mod
+	
+

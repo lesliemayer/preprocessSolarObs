@@ -1,0 +1,6 @@
+&inputs
+inputDir = '/home/lmayer/WSA/WSA_SUB2.2//DATA/PRE-PROCESS/GONG/CARR/'
+inputFile = 'gong2078_000_1.fts'
+outputDir = '/home/lmayer/WSA/WSA_SUB2.2//DATA/SYNOPTIC/GONG/CARR/'
+mapType = 'FR'
+/
